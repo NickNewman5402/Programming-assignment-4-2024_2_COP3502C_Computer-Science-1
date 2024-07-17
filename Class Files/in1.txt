@@ -1,0 +1,47 @@
+0 0 14 5 5
+3 1
+-6 -2
+-4 3
+4 -4
+2 4
+-1 3
+2 2
+0 -5
+-4 -2
+-6 6
+4 4
+-2 4
+0 5
+-4 6
+2 -1
+3 1  
+0 -5  
+0 5
+-6 7
+
+0 0 14 5 5
+0 my location x
+0 my location y
+14 number of smoothie shops (n)
+5 number of points to search for (s)
+5 represents the threshold to be used for determining whether you run Merge Sort of Insertion Sort (t)
+
+3 1
+-6 -2
+-4 3
+4 -4
+2 4
+-1 3
+2 2
+0 -5
+-4 -2
+-6 6 
+4 4 
+-2 4
+0 5
+-4 6
+2 -1
+3 1  
+0 -5  
+0 5
+-6 7
