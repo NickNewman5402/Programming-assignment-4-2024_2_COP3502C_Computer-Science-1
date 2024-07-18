@@ -10,15 +10,21 @@
 #include <math.h>
 
 typedef struct LocationStores {
-  double x;
-  double y;
-  double distance;
+  int x;
+  int y;
+  int distance;
 }LocationStores;
 
 typedef struct LocationMe {
-  double x;
-  double y;
+  int x;
+  int y;
 }LocationMe;
+
+typedef struct Queries {
+  int x;
+  int y;
+  int distance;
+}Queries;
 
 typedef struct Locations {
   LocationStores* store;
@@ -32,40 +38,52 @@ void mergeSort(LocationStores*, int, int);
 void merge(LocationStores*, int, int, int, LocationMe*);
 void mergeInsertionSort(LocationStores*, int, int, int, LocationMe*);
 void insertionMergeSort(LocationStores*, int, int, LocationMe*);
+void findStore(LocationStores*, Queries*, int, int);
 LocationMe* ReadData(int*, int*);
 
+int myX, myY;
 
 int main(void) {
 
-  float myX, myY;
-  int n, s, t;
+  int numStores, numQueries, THRESHOLD;
 
   /* So number 3 in the PDF 3. You must implement a ReadData() function that reads the required data from the inputs and return the array of points to be sorted. Do i need 1 structure with both other structs in them? I would still need two different "ReadDatas" would I not ex LocationMe* me = ReadDataMe(&x, &y) and LocationStores* store = ReadDataStore(&n, &s, &t)
   */
-  scanf("%f %f %d %d %d", &myX, &myY, &n, &s, &t);
+  scanf("%d %d %d %d %d", &myX, &myY, &numStores, &numQueries, &THRESHOLD);
 
 
   LocationMe* my = malloc(sizeof(LocationMe));
-  LocationStores* store = malloc(sizeof(LocationStores) * n);
+  LocationStores* store = malloc(sizeof(LocationStores) * numStores);
+  Queries* query = malloc(sizeof(Queries) * numQueries);
 
   my->x = myX;
   my->y = myY;
-  int THRESHOLD = t;
 
-  for (int i = 0; i < n; i++) {
-    scanf("%lf %lf", &store[i].x, &store[i].y);
-    //store[i].x = abs(store[i].x);
-    //store[i].y = abs(store[i].y);
+  // Setting coordinates to stores
+  for (int i = 0; i < numStores; i++) {
+    scanf("%d %d", &store[i].x, &store[i].y);
   }
 
-  for (int i = 0; i < n; i++) {
+  // Calculating distance from me to store and storing it in store[]
+  for (int i = 0; i < numStores; i++) {
     store[i].distance = sqrt(pow((store[i].x - my->x), 2) + pow((store[i].y - my->y), 2));
+  }
+
+  for (int i = 0; i < numQueries; i++) {
+    scanf("%d %d", &query[i].x, &query[i].y);
+  }
+
+  for (int i = 0; i < numQueries; i++) {
+    query[i].distance = sqrt(pow((query[i].x - my->x), 2) + pow((query[i].y - my->y), 2));
   }
 
 
   /*DEBUG VERIFY ALL INITIAL COORDINATES*/
   //printf("\n\nInitial Coordinates:\nmy x = %0.0lf my y = %0.0lf\n", my->x, my->y);
-  printStores(store, n);
+  //printStores(store, numStores);
+  //for (int i = 0; i < numQueries; i++) {
+  //	printf("\nquery[%d].x = %d and query[%d].y = %d", i, query[i].x, i, query[i].y);
+  //}
 
   /*
   mergeSort(store, 0, n-1);
@@ -75,12 +93,15 @@ int main(void) {
   printStores(store, n);
   */
 
-  mergeInsertionSort(store, 0, n - 1, THRESHOLD, my);
+  mergeInsertionSort(store, 0, numStores - 1, THRESHOLD, my);
 
   /*DEBUG VERIFY ALL SORTED COORDINATES*/
   //printf("\n\nSorted Coordinates:\nmy x = %0.0lf my y = %0.0lf\n", my->x, my->y);
-  printf("\n");
-  printStores(store, n);
+  //printf("\n");
+  printStores(store, numStores);
+  findStore(store, query, numQueries, numStores);
+
+
 
 
   return 0;
@@ -96,7 +117,7 @@ LocationMe* ReadData(int* x, int* y) {
 void printStores(LocationStores* store, int n) {
   //printf("\n");
   for (int i = 0; i < n; i++) {
-    printf("%2.0lf %2.0lf\n", store[i].x, store[i].y);
+    printf("%d %d\n", store[i].x, store[i].y);
     //printf("Store[%02d] x = %2.0lf  Store[%02d] y = %2.0lf  Distance to me is %5.2lf\n", i, store[i].x, i, store[i].y, store[i].distance);
   }
 }
@@ -202,4 +223,51 @@ void insertionMergeSort(LocationStores* store, int l, int r, LocationMe* my) {
     }
     store[j + 1] = hand;
   }
+}
+
+void findStore(LocationStores* store, Queries* query, int numQueries, int numStores) {
+
+  for (int i = 0; i < numQueries; i++) {
+
+    int rank = binarySearch(store, 0, numStores - 1, query[i]);
+
+    if (rank != -1) {
+      printf("%d %d found at rank %d", query[i].x, query[i].y, rank+1);
+    }
+    else {
+      printf("%d %d not found", query[i].x, query[i].y);
+    }
+    printf("\n");
+  }
+}
+
+int binarySearch(LocationStores* store, int l, int r, Queries query) {
+  int low = l;
+  int high = r;
+  while (low <= high) {
+    int mid = low + (high - low) / 2;
+    if (store[mid].x == query.x && store[mid].y == query.y) {
+      return mid;
+    }
+    if (compareTo(&store[mid], &query) < 0) {
+      low = mid + 1;
+    }
+    else {
+      high = mid - 1;
+    }
+  }
+  return -1; // Return -1 if not found
+}
+
+
+int compareTo(const void* a, const void* b) {
+  LocationStores* locA = (LocationStores*)a;
+  LocationStores* locB = (LocationStores*)b;
+
+  if (locA->distance < locB->distance) return -1;
+  if (locA->distance > locB->distance) return 1;
+  if (locA->x < locB->x) return -1;
+  if (locA->x > locB->x) return 1;
+  if (locA->y < locB->y) return -1;
+  return 1;
 }
