@@ -10,20 +10,20 @@
 #include <math.h>
 
 typedef struct LocationStores {
-  int x;
-  int y;
-  int distance;
+  double x;
+  double y;
+  double distance;
 }LocationStores;
 
 typedef struct LocationMe {
-  int x;
-  int y;
+  double x;
+  double y;
 }LocationMe;
 
 typedef struct Queries {
-  int x;
-  int y;
-  int distance;
+  double x;
+  double y;
+  double distance;
 }Queries;
 
 typedef struct Locations {
@@ -61,7 +61,7 @@ int main(void) {
 
   // Setting coordinates to stores
   for (int i = 0; i < numStores; i++) {
-    scanf("%d %d", &store[i].x, &store[i].y);
+    scanf("%lf %lf", &store[i].x, &store[i].y);
   }
 
   // Calculating distance from me to store and storing it in store[]
@@ -70,7 +70,7 @@ int main(void) {
   }
 
   for (int i = 0; i < numQueries; i++) {
-    scanf("%d %d", &query[i].x, &query[i].y);
+    scanf("%lf %lf", &query[i].x, &query[i].y);
   }
 
   for (int i = 0; i < numQueries; i++) {
@@ -102,22 +102,24 @@ int main(void) {
   findStore(store, query, numQueries, numStores);
 
 
-
+  free(my);
+  free(store);
+  free(query);
 
   return 0;
 
 }
-
+/*
 LocationMe* ReadData(int* x, int* y) {
   LocationMe* my = malloc(sizeof(LocationMe));
   scanf("%d %d", &my->x, &my->y);
   return my;
 }
-
+*/
 void printStores(LocationStores* store, int n) {
   //printf("\n");
   for (int i = 0; i < n; i++) {
-    printf("%d %d\n", store[i].x, store[i].y);
+    printf("%1.0lf %1.0lf\n", store[i].x, store[i].y);
     //printf("Store[%02d] x = %2.0lf  Store[%02d] y = %2.0lf  Distance to me is %5.2lf\n", i, store[i].x, i, store[i].y, store[i].distance);
   }
 }
@@ -161,14 +163,15 @@ void merge(LocationStores* store, int l, int m, int r, LocationMe* my) {
   while (i < n1 && j < n2) {
 
     if (L[i].distance < R[j].distance ||
-       (L[i].distance == R[j].distance && L[i].x < R[j].x) ||
-       (L[i].distance == R[j].distance && L[i].x == R[j].x && L[i].y < R[j].y)) {
+      (L[i].distance == R[j].distance && L[i].x < R[j].x) ||
+      (L[i].distance == R[j].distance && L[i].x == R[j].x && L[i].y < R[j].y)) {
 
       store[k] = L[i];
       i++;
       k++;
 
-    } else {
+    }
+    else {
 
       store[k] = R[j];
       j++;
@@ -216,7 +219,7 @@ void insertionMergeSort(LocationStores* store, int l, int r, LocationMe* my) {
     for (j = i - 1; j >= l &&
       (store[j].distance > hand.distance ||
       (store[j].distance == hand.distance && store[j].x > hand.x) ||
-      (store[j].distance == hand.distance && store[j].x == hand.x && store[j].y > hand.y)); j--) {
+        (store[j].distance == hand.distance && store[j].x == hand.x && store[j].y > hand.y)); j--) {
 
       store[j + 1] = store[j];
 
@@ -232,10 +235,10 @@ void findStore(LocationStores* store, Queries* query, int numQueries, int numSto
     int rank = binarySearch(store, 0, numStores - 1, query[i]);
 
     if (rank != -1) {
-      printf("%d %d found at rank %d", query[i].x, query[i].y, rank+1);
+      printf("%1.0lf %1.0lf found at rank %d", query[i].x, query[i].y, rank + 1);
     }
     else {
-      printf("%d %d not found", query[i].x, query[i].y);
+      printf("%1.0lf %1.0lf not found", query[i].x, query[i].y);
     }
     printf("\n");
   }
