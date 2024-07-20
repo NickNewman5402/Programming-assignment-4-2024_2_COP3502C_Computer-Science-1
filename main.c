@@ -20,27 +20,18 @@ typedef struct LocationMe {
   double y;
 }LocationMe;
 
-typedef struct Queries {
-  double x;
-  double y;
-  double distance;
-}Queries;
 
-typedef struct Locations {
-  LocationStores* store;
-  LocationMe* me;
-}Locations;
-
-//LocationMe* ReadData(int*, int*);
-void printStores(LocationStores*, int);
-void swap(int*, int*);
-void mergeSort(LocationStores*, int, int);
-void merge(LocationStores*, int, int, int, LocationMe*);
-void mergeInsertionSort(LocationStores*, int, int, int, LocationMe*);
-void insertionMergeSort(LocationStores*, int, int, LocationMe*);
-void findStore(LocationStores*, Queries*, int, int);
-int compareTo(LocationStores*, Queries*);
-
+void ReadData(LocationMe** my, LocationStores** store, LocationStores** query, int* n, int* s, int* t);
+void printStores(LocationStores* store, int n);
+//void swap(int*, int*);
+//void mergeSort(LocationStores*, int, int);
+void merge(LocationStores* store, int l, int m, int r, LocationMe* my);
+void mergeInsertionSort(LocationStores* store, int l, int r, int THRESHOLD, LocationMe* my);
+void insertionMergeSort(LocationStores* store, int l, int r, LocationMe* my);
+void findStore(LocationStores* store, LocationStores* query, int numQueries, int numStores);
+int binarySearch(LocationStores* store, int l, int r, LocationStores query);
+int compareTo(LocationStores* store, LocationStores* query);
+//int compareTo(const void*, StructType, const void*, StructType);
 
 int myX, myY;
 
@@ -48,43 +39,21 @@ int main(void) {
 
   int numStores, numQueries, THRESHOLD;
 
-  /* So number 3 in the PDF 3. You must implement a ReadData() function that reads the required data from the inputs and return the array of points to be sorted. Do i need 1 structure with both other structs in them? I would still need two different "ReadDatas" would I not ex LocationMe* me = ReadDataMe(&x, &y) and LocationStores* store = ReadDataStore(&n, &s, &t)
-  */
-  scanf("%d %d %d %d %d", &myX, &myY, &numStores, &numQueries, &THRESHOLD);
+  LocationMe* my;
+  LocationStores* store;
+  LocationStores* query;
 
-  LocationMe* my = malloc(sizeof(LocationMe));
-  LocationStores* store = malloc(sizeof(LocationStores) * numStores);
-  Queries* query = malloc(sizeof(Queries) * numQueries);
+  // Reading in all data and building arrays/structs
+  ReadData(&my, &store, &query, &numStores, &numQueries, &THRESHOLD);
 
-  my->x = myX;
-  my->y = myY;
-
-  // Setting coordinates to stores
-  for (int i = 0; i < numStores; i++) {
-    scanf("%lf %lf", &store[i].x, &store[i].y);
-  }
-
-  // Calculating distance from me to store and storing it in store[]
-  for (int i = 0; i < numStores; i++) {
-    store[i].distance = sqrt(pow((store[i].x - my->x), 2) + pow((store[i].y - my->y), 2));
-  }
-
-  // Setting Query coordinates
-  for (int i = 0; i < numQueries; i++) {
-    scanf("%lf %lf", &query[i].x, &query[i].y);
-  }
-
-  // Calculating Query points distance to me
-  for (int i = 0; i < numQueries; i++) {
-    query[i].distance = sqrt(pow((query[i].x - my->x), 2) + pow((query[i].y - my->y), 2));
-  }
 
   // Sort main list coordinates
   mergeInsertionSort(store, 0, numStores - 1, THRESHOLD, my);
 
   // Print out sorted list as per output restriction
   printStores(store, numStores);
-  // Start looking at queries and comparing to store coordinate list
+
+  // Start looking at queries and comparing to store coordinate list. Also print out in this function
   findStore(store, query, numQueries, numStores);
 
 
@@ -95,19 +64,46 @@ int main(void) {
   return 0;
 
 }
-/*
-LocationMe* ReadData(int* x, int* y) {
-  LocationMe* my = malloc(sizeof(LocationMe));
-  scanf("%d %d", &my->x, &my->y);
-  return my;
+
+void ReadData(LocationMe** my, LocationStores** store, LocationStores** query, int* n, int* s, int* t) {
+
+  scanf("%d %d %d %d %d", &myX, &myY, n, s, t);
+
+  *my = malloc(sizeof(LocationMe));
+  *store = malloc(sizeof(LocationStores) * *n);
+  *query = malloc(sizeof(LocationStores) * *s);
+
+  (*my)->x = myX;
+  (*my)->y = myY;
+
+  // Setting coordinates to stores
+  for (int i = 0; i < *n; i++) {
+    scanf("%lf %lf", &(*store)[i].x, &(*store)[i].y);
+  }
+
+  // Calculating distance from me to store and storing it in store[].distance
+  for (int i = 0; i < *n; i++) {
+    (*store)[i].distance = sqrt(pow(((*store)[i].x - (*my)->x), 2) + pow(((*store)[i].y - (*my)->y), 2));
+  }
+
+  // Setting Query coordinates
+  for (int i = 0; i < *s; i++) {
+    scanf("%lf %lf", &(*query)[i].x, &(*query)[i].y);
+  }
+
+  // Calculating Query points distance to me and storing un query[].distance
+  for (int i = 0; i < *s; i++) {
+    (*query)[i].distance = sqrt(pow(((*query)[i].x - (*my)->x), 2) + pow(((*query)[i].y - (*my)->y), 2));
+  }
+
 }
-*/
+
+
 void printStores(LocationStores* store, int n) {
   //printf("\n");
   for (int i = 0; i < n; i++) {
     printf("%1.0lf %1.0lf\n", store[i].x, store[i].y);
-    //printf("Store[%02d] x = %2.0lf  Store[%02d] y = %2.0lf  Distance to me is %5.2lf\n", i, store[i].x, i, store[i].y, store[i].distance);
-  }
+    }
 }
 
 void mergeInsertionSort(LocationStores* store, int l, int r, int THRESHOLD, LocationMe* my) {
@@ -128,7 +124,6 @@ void mergeInsertionSort(LocationStores* store, int l, int r, int THRESHOLD, Loca
 
 void merge(LocationStores* store, int l, int m, int r, LocationMe* my) {
 
-  // I guess I need a compare function in here?
   int i, j, k;
 
   int n1 = m - l + 1;// array size for left array
@@ -152,10 +147,8 @@ void merge(LocationStores* store, int l, int m, int r, LocationMe* my) {
 
   while (i < n1 && j < n2) {// while we are still in bounds of either array
 
-        // determining is this left index has the lowest distance first, the lowest x next, the lowest y last
-    if (L[i].distance < R[j].distance ||
-       (L[i].distance == R[j].distance && L[i].x < R[j].x) ||
-       (L[i].distance == R[j].distance && L[i].x == R[j].x && L[i].y < R[j].y)) {
+        // determining if this left index has the lowest distance first, the lowest x next, the lowest y last
+    if (compareTo(&L[i], &R[j]) <= 0) {
 
       store[k] = L[i];
       i++;
@@ -195,13 +188,13 @@ void merge(LocationStores* store, int l, int m, int r, LocationMe* my) {
 void insertionMergeSort(LocationStores* store, int l, int r, LocationMe* my) {
     // This is like taking out a book +1 of current pos and comparing to the left.
     // If the book is smaller we move it down until it is no longer the smallest.
+
   for (int i = l + 1; i <= r; i++) {
     LocationStores hand = store[i];
     int j;
-    for (j = i - 1; j >= l &&
-      (store[j].distance > hand.distance ||
-      (store[j].distance == hand.distance && store[j].x > hand.x) ||
-      (store[j].distance == hand.distance && store[j].x == hand.x && store[j].y > hand.y)); j--) {
+    //compareTo(&store[j], &hand);
+
+    for (j = i - 1; j >= l && compareTo(&store[j], &hand) > 0; j--) {
 
       store[j + 1] = store[j];
 
@@ -210,7 +203,7 @@ void insertionMergeSort(LocationStores* store, int l, int r, LocationMe* my) {
   }
 }
 
-void findStore(LocationStores* store, Queries* query, int numQueries, int numStores) {
+void findStore(LocationStores* store, LocationStores* query, int numQueries, int numStores) {
 
   for (int i = 0; i < numQueries; i++) {
 
@@ -226,18 +219,19 @@ void findStore(LocationStores* store, Queries* query, int numQueries, int numSto
   }
 }
 
-int binarySearch(LocationStores* store, int l, int r, Queries query) {
+int binarySearch(LocationStores* store, int l, int r, LocationStores query) {
   int low = l;
   int high = r;
 
   while (low <= high) {
     int mid = low + (high - low) / 2;
+    int searchVal = compareTo(&store[mid], &query);
 
-    if (store[mid].x == query.x && store[mid].y == query.y) {
+    if (searchVal == 0) {
       return mid;
     }// ends if
 
-    if (compareTo(&store[mid], &query) < 0) {
+    if (searchVal < 0) {
       low = mid + 1;
     }
     else {
@@ -250,12 +244,15 @@ int binarySearch(LocationStores* store, int l, int r, Queries query) {
 
 }// ends binarySearch
 
-int compareTo(LocationStores* store, Queries* query) {
+
+int compareTo(LocationStores* store, LocationStores* query) {
 
   if (store->distance < query->distance) return -1;
   if (store->distance > query->distance) return 1;
   if (store->x < query->x) return -1;
   if (store->x > query->x) return 1;
   if (store->y < query->y) return -1;
-  return 1;
+  if(store->y > query->y) return 1;
+
+  return 0;
 }
