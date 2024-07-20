@@ -23,15 +23,12 @@ typedef struct LocationMe {
 
 void ReadData(LocationMe** my, LocationStores** store, LocationStores** query, int* n, int* s, int* t);
 void printStores(LocationStores* store, int n);
-//void swap(int*, int*);
-//void mergeSort(LocationStores*, int, int);
-void merge(LocationStores* store, int l, int m, int r, LocationMe* my);
 void mergeInsertionSort(LocationStores* store, int l, int r, int THRESHOLD, LocationMe* my);
+void merge(LocationStores* store, int l, int m, int r, LocationMe* my);
 void insertionMergeSort(LocationStores* store, int l, int r, LocationMe* my);
 void findStore(LocationStores* store, LocationStores* query, int numQueries, int numStores);
 int binarySearch(LocationStores* store, int l, int r, LocationStores query);
 int compareTo(LocationStores* store, LocationStores* query);
-//int compareTo(const void*, StructType, const void*, StructType);
 
 int myX, myY;
 
@@ -98,9 +95,8 @@ void ReadData(LocationMe** my, LocationStores** store, LocationStores** query, i
 
 }
 
-
 void printStores(LocationStores* store, int n) {
-  //printf("\n");
+
   for (int i = 0; i < n; i++) {
     printf("%1.0lf %1.0lf\n", store[i].x, store[i].y);
     }
@@ -192,8 +188,7 @@ void insertionMergeSort(LocationStores* store, int l, int r, LocationMe* my) {
   for (int i = l + 1; i <= r; i++) {
     LocationStores hand = store[i];
     int j;
-    //compareTo(&store[j], &hand);
-
+    
     for (j = i - 1; j >= l && compareTo(&store[j], &hand) > 0; j--) {
 
       store[j + 1] = store[j];
@@ -243,7 +238,6 @@ int binarySearch(LocationStores* store, int l, int r, LocationStores query) {
   return -1; // Return -1 if not found
 
 }// ends binarySearch
-
 
 int compareTo(LocationStores* store, LocationStores* query) {
 
